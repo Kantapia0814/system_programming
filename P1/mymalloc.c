@@ -16,7 +16,7 @@ void leak_detector(){
     //int num_bytes = 0;
     int num_objects = 0;
     int location = 0;
-    while(location < MEMLENGTH - 8){
+    while(location <= MEMLENGTH - 8){
         if(*(int *)(heap.bytes + location + 4) == 1){
             //num_bytes += *(int *)(heap.bytes + location);
             num_objects++;
@@ -78,7 +78,7 @@ void badPointer(void *ptr, char *file, int line) {
     // Condition 2
     int location = 0;
     int found = 0;
-    while (location < MEMLENGTH) {
+    while (location <= MEMLENGTH - 8) {
         if ((int *)(heap.bytes + location + 8) == ptr) {
             found = 1;
             break;
@@ -99,7 +99,7 @@ void badPointer(void *ptr, char *file, int line) {
 
 void coalesce() {
     int location = 0;
-    while (location < MEMLENGTH) {
+    while (location <= MEMLENGTH - 8) {
         int currentSize = *(int *)(heap.bytes + location);
         int currentAllocation = *(int *)(heap.bytes + location + 4);
         if (currentAllocation == 0) {

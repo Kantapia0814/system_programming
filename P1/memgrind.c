@@ -29,6 +29,9 @@ void stress_test2() {
 void stress_test3() {
     void *arr[120];
     for(int i = 0; i < 120; i++){
+        arr[i] = NULL;
+    }
+    for(int i = 0; i < 120; i++){
         int whatDo = rand();
         int arrIndex = 0;
         if(whatDo >= RAND_MAX / 2){ 
@@ -42,8 +45,9 @@ void stress_test3() {
             }
         } else {
             while(arrIndex < 120){
-                if(*(int *)(arr[arrIndex] - 4) == 1){
+                if (arr[arrIndex] != NULL && *(int *)(arr[arrIndex] - 4) == 1) {
                     free(arr[arrIndex]);
+                    arr[arrIndex] = NULL;
                     arrIndex = 0;
                     break;
                 }
@@ -52,7 +56,7 @@ void stress_test3() {
         }
     }
     for (int i = 0; i < 120; i++) {
-        if (*(int *)(arr[i] - 4) == 1) {
+        if (arr[i] != NULL && *(int *)(arr[i] - 4) == 1) {
             free(arr[i]);
         }
     }
@@ -67,7 +71,7 @@ void stress_test4() {
         if(whatDo >= RAND_MAX / 2){ 
             while(arrIndex < 120){
                 if(arr[arrIndex] == NULL){
-                    arr[arrIndex] = malloc((rand() % 512)*16);
+                    arr[arrIndex] = malloc((rand() % 512)*8);
                     arrIndex = 0;
                     break;
                 }
@@ -75,7 +79,7 @@ void stress_test4() {
             }
         } else {
             while(arrIndex < 120){
-                if(*(int *)(arr[arrIndex] - 4) == 1){
+                if (arr[arrIndex] != NULL && *(int *)(arr[arrIndex] - 4)) {
                     free(arr[arrIndex]);
                     arrIndex = 0;
                     break;
@@ -112,8 +116,8 @@ void leak_test() {
 
 int main() {
     //stress_test2();
-    //stress_test3();
-    stress_test4();
+    stress_test3();
+    //stress_test4();
     //stress_test5();
     //leak_test();
     return 0;
