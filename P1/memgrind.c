@@ -124,14 +124,14 @@ void stress_test5() {
     }
 }
 
-// Test 6
+// we needed this bc code was bad, not anymore
 void leak_test() {
     void *ptr = malloc(1);
     free(ptr);
 }
 
-// Test 7: Edit version of test 3
-void stress_test7() {
+// Test 6: Edit version of test 3
+void stress_test6() {
     void *arr[120] = {NULL};
     for(int i = 0; i < 120; i++){
         arr[i] = NULL;
@@ -180,7 +180,7 @@ int main() {
         stress_test4();
         stress_test5();
         leak_test();
-        stress_test7();
+        stress_test6();
 
         end = clock();
     }
