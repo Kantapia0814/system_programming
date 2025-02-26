@@ -18,7 +18,7 @@ void stress_test2() {
     void *ptr_lst[120];
 
     for (int i = 0; i < 120; i++) {
-        printf("%d\n", i);
+        //printf("%d\n", i);
         ptr_lst[i] = malloc(1);
     }
     for (int i = 0; i < 120; i++) {
@@ -75,7 +75,10 @@ void stress_test4() {
             while(arrIndex < 120){
                 if(arr[arrIndex] == NULL){
                     srand(time(NULL));
-                    arr[arrIndex] = malloc((rand() % 512)*8);
+                    // this can't allocate more bytes than are in the heap, max is 511*8 = 4088
+                    //it will fail a million times though (intentionally)
+                    //not sure if conflicts with the not in (4.0) of the writeup
+                    arr[arrIndex] = malloc((rand() % 512)*8); 
                     arrIndex = 0;
                     break;
                 }
@@ -110,13 +113,13 @@ void stress_test5() {
     for (int i = 0; i < 100; i+=2) {
         if (arr[i] != NULL) {
             free(arr[i]);
-            printf("%d\n", i);
+            //printf("%d\n", i);
         }    
     }
     for (int i = 1; i < 100; i+=2) {
         if (arr[i] != NULL) {
             free(arr[i]);
-            printf("%d\n", i);
+            //printf("%d\n", i);
         }
     }
 }
@@ -142,40 +145,49 @@ void stress_test7() {
             if (temp != NULL) {
                 arr[random_number] = temp;
                 count++;
-            } else {
-                fprintf(stderr, "Error: malloc failed at index %d\n", random_number);
-            }
+            } 
+            //this is superflous, it always triggers when malloc fails.
+            /*else {
+                //If malloc fails to allocate, we print that the array entry could not be malloced
+                fprintf(stderr, "Malloc failed at index %d\n", random_number);
+            }*/
         } 
         if (random_choice == 0 && arr[random_number] != NULL) {
             free(arr[random_number]);
             arr[random_number] = NULL;
-            printf("free success\n");
+            // printf("free success\n");
         }
     }
     for (int i = 0; i < 120; i++) {
         if (arr[i] != NULL) {
-            printf("freeing %d\n", i);  // index 44 badpointer, check it in arrange or not
+            // printf("freeing %d\n", i);  // index 44 badpointer, check it in arrange or not
             free(arr[i]);
             arr[i] = NULL;
         }
     }
 }
 
-// Test 8: Edit version of test 4
-
-
-
 int main() {
+    clock_t start, end;
+    double test_time;
 
     for (int i = 0; i < 50; i++) {
+        start = clock();
 
+        stress_test1();
+        stress_test2();
+        stress_test3();
+        stress_test4();
+        stress_test5();
+        leak_test();
+        stress_test7();
+
+        end = clock();
     }
-    //stress_test2();
-    stress_test3();
-    //stress_test4();
-    //stress_test5();
-    //leak_test();
     
-    //stress_test7();
+    
+
+    test_time = (((double)(end - start)) / CLOCKS_PER_SEC) / 50;
+    printf("Average time of test loop: %f sec\n", test_time);
     return 0;
 }

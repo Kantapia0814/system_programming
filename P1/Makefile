@@ -3,14 +3,15 @@ CFLAGS = -std=c99 -g -Wall -fsanitize=address,undefined
 
 SRC = memgrind.c mymalloc.c
 OBJ = $(SRC:.c=.o)
+TARGET ?= memgrind  
 
-all: memgrind
+all: $(TARGET)
 
-memgrind: $(OBJ)
+$(TARGET): $(OBJ)
 	$(CC) $(CFLAGS) -o $@ $^
 
 %.o: %.c mymalloc.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJ) $(EXEC)
+	rm -f $(OBJ) $(TARGET)
