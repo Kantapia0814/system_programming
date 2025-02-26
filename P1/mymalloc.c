@@ -25,7 +25,7 @@ void leak_detector(){
     }
     if(num_objects > 0){
         //printf("mymalloc: %d bytes leaked in %d objects", num_bytes, num_objects);
-        printf("mymalloc: %d objects leaked", num_objects);
+        printf("mymalloc: %d objects leaked\n", num_objects);
     }
 }
 
@@ -40,6 +40,7 @@ void init_heap() {
 
 void *mymalloc(size_t size, char *file, int line) {
     if (!isIni) {
+        // printf("%p\n", (int *)(heap.bytes));
         init_heap();    // initialize the heap if it has not been initialized
     }
     size = (size + 7) & ~7; // round up to the nearest multiple of 8 bytes
@@ -56,7 +57,7 @@ void *mymalloc(size_t size, char *file, int line) {
                 *(int *)(heap.bytes + location) = size;     // set the size of the first split block
                 *(int *)(heap.bytes + location + 4) = 1;    // set the first block as allocated
 
-                *(int *)(heap.bytes + location + size + 8) = chunkSize - size;  // set the size of the new block
+                *(int *)(heap.bytes + location + size + 8) = chunkSize - size - 8;  // set the size of the new block
                 *(int *)(heap.bytes + location + size + 12) = 0; // set the new block as unallocated
                 return (void *)(heap.bytes + location + 8); // return the start address
             }
@@ -72,7 +73,7 @@ void badPointer(void *ptr, char *file, int line) {
     // Condition 1
     int diff = (char *)ptr - (char *)heap.bytes;    // ptr가 heap.bytes 내부에 있는지 확인 (내부에 있으면 ptr가 heap.bytes보다 큼)
     if (diff < 0 || diff >= MEMLENGTH) {
-        fprintf(stderr, "free: Inappropriate pointer (%s.c%d)", file, line);
+        fprintf(stderr, "free: Inappropriate pointer (%s %d)\n", file, line);
         exit(2);
     } 
     // Condition 2
@@ -86,12 +87,12 @@ void badPointer(void *ptr, char *file, int line) {
         location += *(int *)(heap.bytes + location) + 8;
     }
     if (!found) {
-        fprintf(stderr, "free: Inappropriate pointer (%s.c%d)", file, line);
+        fprintf(stderr, "free: Inappropriate pointer (%s %d)\n", file, line);
         exit(2);
     }
     // Condition 3
     if (*(int *)(ptr - 4) == 0) {
-        fprintf(stderr, "free: Inappropriate pointer (%s.c%d)", file, line);
+        fprintf(stderr, "free: Inappropriate pointer (%s %d)\n", file, line);
         exit(2);
         // similiar with condition 2
     }

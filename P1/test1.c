@@ -3,7 +3,6 @@
 #include <unistd.h>
 #include <string.h>
 #include "mymalloc.h"
-#include <time.h>
 
 // Test 1: Repeat the process of allocating 1 byte and immediately freeing it 120 times
 void stress_test1() {
@@ -62,19 +61,16 @@ void stress_test3() {
         }
     }
 }
-// Test 4: 
+
+// Test 4:
 void stress_test4() {
-    void *arr[120];
-    for(int i = 0; i < 120; i++){
-        arr[i] = NULL;
-    }
+    void* arr[120];
     for(int i = 0; i < 120; i++){
         int whatDo = rand();
         int arrIndex = 0;
         if(whatDo >= RAND_MAX / 2){ 
             while(arrIndex < 120){
                 if(arr[arrIndex] == NULL){
-                    srand(time(NULL));
                     arr[arrIndex] = malloc((rand() % 512)*8);
                     arrIndex = 0;
                     break;
@@ -83,9 +79,8 @@ void stress_test4() {
             }
         } else {
             while(arrIndex < 120){
-                if (arr[arrIndex] != NULL && *(int *)(arr[arrIndex] - 4) == 1) {
+                if (arr[arrIndex] != NULL && *(int *)(arr[arrIndex] - 4)) {
                     free(arr[arrIndex]);
-                    arr[arrIndex] = NULL;
                     arrIndex = 0;
                     break;
                 }
@@ -94,13 +89,11 @@ void stress_test4() {
         }
     }
     for (int i = 0; i < 120; i++) {
-        if (arr[i] != NULL && *(int *)(arr[i] - 4) == 1) {
+        if (*(int *)(arr[i] - 4) == 1) {
             free(arr[i]);
         }
     }
 }
-
-
 // Test 5: 
 void stress_test5() {
     void *arr[100];
@@ -114,10 +107,7 @@ void stress_test5() {
         }    
     }
     for (int i = 1; i < 100; i+=2) {
-        if (arr[i] != NULL) {
-            free(arr[i]);
-            printf("%d\n", i);
-        }
+        free(arr[i]);
     }
 }
 
@@ -138,7 +128,7 @@ void stress_test7() {
         int random_number = rand() % 120;
         int random_choice = rand() % 2;
         if (random_choice == 1 && arr[random_number] == NULL) {
-            void *temp = malloc(rand() % 120);
+            void *temp = malloc(1);
             if (temp != NULL) {
                 arr[random_number] = temp;
                 count++;
@@ -166,16 +156,11 @@ void stress_test7() {
 
 
 int main() {
-
-    for (int i = 0; i < 50; i++) {
-
-    }
     //stress_test2();
     stress_test3();
     //stress_test4();
     //stress_test5();
     //leak_test();
-    
     //stress_test7();
     return 0;
 }
