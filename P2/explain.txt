@@ -1,0 +1,55 @@
+A           spam eggs bacon spam
+B           spam spam spam
+C           spam eggs Beans
+
+global list (spam, 6) -> (eggs,2) -> (beans,1) -> (bacon,1)
+
+LLA         (spam, 2) ->  (eggs, 1) -> (bacon, 1)
+LLB         (spam,3)
+LLC         (spam,1)->(eggs,1)->(beans,1)
+
+How do we logically do this?
+
+
+Let's say we have different linked lists for each file:
+
+create a new global struct, with all the wordcounts for all the files.
+create a new linked list for each file (contain word, wordcount, next word)
+
+we need to calculate the total number of words (iterate through global list, add up all the words)
+
+to make the chart:
+for each local list have:
+    double globalfrequency = 0;
+    double totalwordcount = 0;
+    char* word;
+    while(wordList != NULL){
+        double tempFrequency = 0;
+        while(strcmp(GlobalList.word, LocalList.word) != 1){   \\ while the words aren't the same
+            globalist = globalList.next or globallist -> next word        \\ iterate to the next word
+        }
+        tempFrequency = ((LocalList.frequency / totallocalwordcount) / (Globallist.frequency / total words));
+        if(globalfrequency < tempFrequency){
+            global word = local word;
+        }
+    }
+let's say we find the most common word,
+we just print it. that's it.
+
+
+
+
+
+
+
+If we have on linked list (for all files)---- how do we keep track of per file frequency
+ (unless we add int filex = # words) to the struct. but then we need to dynamically increase each struct to add new files
+ ie.
+ the struct would be 
+ typedef struct * wordList(const char * path){
+    char* word;
+    int file1 = number of words in file 1;
+    int file2
+
+    would have to increae this, so not sure if it works. 
+ }

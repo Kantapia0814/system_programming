@@ -1,0 +1,44 @@
+Dennis Karpenko, Suk Jin Hong
+
+Design Choices:
+    Read Function (file parser):
+    This a simple non-dynamic parser, which is allows since we can read an entire file in one read() call.
+    I had a dynamically allocating one before, which was the professors "lines" source code, modified
+    to read words as opposed to line (I wasn't aware of st_size, I glanced over it when reading the documentation).
+    It was a beast though, way too long and not modular, whereas this single pass is greatly simplified (dynamic allocation
+    introduces significantly more edge cases, which gets hard to keep track of if you're not coding intentionally, which I wasn't).
+    The code itself is quite straightforward, two pointers and some simple isspace()/isvalid() checks, as described in the writeup.
+
+    F_or_D   (arg parser):
+    This is again, a standard file parser that recurses on itself if a directory is input as an arg (or a dir within that dir).
+    A simple depth boolean keeps track of whether or not we are in the project directory, as that was the only conditional.
+    A last minute addition does a (is arg + ".txt") a vild file check, so the code works as described in section 1 of the writeup.
+
+    various lists (to count the words, find "most frequent"):
+    At first, we planned to make four structures (word list, file list, word frequency list, and global frequency list) to compute everything based solely on the data stored in those lists.
+    However, we realized that this approach was unnecessarily complicated, so we decided to simplify the logic using only the word list and the file list.
+    In the countingWord function, we checked whether a specific word already existed in a particular file. 
+    If it did, we incremented the wordCount. If not, we created a new node and added it to the list.
+    The countEverywords function went through all the files to calculate the total number of words, 
+    while the countEachwords function counted how many times a specific word appeared across all files.
+    To get the result required by the assignment, we needed to calculate    
+    (number of specific word in a single file / total number of words in that file) / (number of specific word in all files / total number of words in all files).
+    The numerator values could be retrieved from the wordCount in the wordList structure and the wordTotal in the fileInfo structure.
+    The denominator values were obtained using the two helper functions mentioned earlier.
+    By combining these four values, we calculated the result inside the printResult function.
+    Lastly, we removed the '.txt' from each file name before printing the result.
+
+description of testing strategy:
+    This came down to a lot of spam, with a little help from chatgpt for some test case ideas. 
+    We initially came up with trying (a lot of invalid chars, a single char, a lot of invalid chars) - a la singleA in test_Dir2.
+    To me it seemed like if the dynamic read can handle it should handle anything, which wasn't the case, but is what it is.
+    Chatgpt output code with intermittent spaces, which was an oversight in the og read function, this accounts for test cases such as
+    spaces, spaces2, among others.
+    The final test we had was for loosely formatted pseudocode, which is a good mix of words and garbage values such as "!=", and seems pretty good
+    for a final test. This is corresponds to file3.txt in test_dir.
+    G (the file) is a good test to make sure we're not making a mistake when calling ./outlier g on a file g for which G.txt does not exist (the code
+    should not look for G.txt, instead just reading G as is. hallelujah!).
+
+    test_dir is SukJin's test code
+    tes_dir2 is my (Dennis) test code
+    test_dir3 is a last minute test for the lexicographic comparison in the "lists" code

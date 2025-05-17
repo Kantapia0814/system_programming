@@ -1,0 +1,99 @@
+dk1111
+sh1949
+
+Dennis Karpenko(dk1111), Suk Jin Hong(sh1949)
+
+Design Choices:
+    readFunction(): this is just a cut down version of our inputparser in project 2, it's rather simple, and not much testing was needed. 
+    
+    and/or operation: The checkAndOr function checks if a line contains '&&' or '||' operators. 
+    If it does, the command line is split into command1 and command2 based on the operator. 
+    The shell then decides whether to execute the second command depending on the result of the first command. 
+    Since internal and external commands are not distinguished at this point, both are handled using the supportInternal and externalFuction functions.
+    Test case for and/or operation: 
+    mysh> cd wrongdirc || echo hi
+    cd: No such file or directory
+    hi
+    mysh> cd .. && echo hi
+    hi
+    mysh> false && cat cmd.txt          // command2 ignored 
+    mysh> true || echo say my name      // command2 ignored 
+
+    Pipe line: If a line contains the pipe operator (|), it is split into separate commands. 
+    The shell must correctly manage the input and output file descriptors for each command in sequence. 
+    For this, we implemented different handling strategies depending on whether the command is the first, middle, 
+    or last in the pipeline, both in the child and parent processes.
+    Test case for pipe line: 
+    mysh> cat *.txt | sort
+    echo hi ronaldo
+    echo ni hao
+    hi
+    Hong.o
+    is
+    Jin
+    ls
+    my
+    name
+    sort
+    Suk
+    mysh> cat cmd.txt | grep o
+    sort
+    echo hi ronaldo
+    echo ni hao
+
+    processwild:         
+    This is our wildcard processor. The code itself is not quite complex, in fact, it's pretty simple (despite the length). All it does is it splits the 
+    wildcard input into a string prefix and suffix, and compares these with the prefixes and suffixes of all files with a greater length than their sum. Helper functions are also 
+    used to process the wildcard depending on whether it has a leading path or not, as well as an updateargs() function to update args. I tried making the code without modularity
+    initially, but this proved a bad idea, so we had to make helper functions to do so (getWildPrefix,getWildSuffix). A big mistake was not properly copying strings, 
+    and not terminating them with the null terminator, which was a pain to fix once the code was compiled with ggc-99 (the whole compile line in the makefile), as opposed to simply
+    gcc -g mysh.c -o mysh. updateargs was used as well to update argv[] in place since we did not use an ArrayList to maintain our tokens (for better or worse). 
+
+    test strategy for processWild:
+    This was ultimately just trying any and all wildcards, ie (file *, file e*, file *.txt, file path/*, file path/*.txt, file path/e*), ie., checking to see if the code would work 
+    with prefixes, suffixes, or neither. an unholy amount of print statements were used as well, since for the first instance of a valid wild card replacement, we have to modify 
+    args in place (ie., we don't append a value to the end). processWild() itself was situated within a while loop in main (of which a parameter of processWild()) was the iterator
+    of the main while loop. This was a major oversight, and took a day to rewrite the function for modularity, as well to fix this.  
+    Other than the code being an unruly beast (prior to modularization) and making it insane to test (mea culpa), there wasn't much sophistication in the test strategy besides
+    any and all inputs involving a wildcard.
+
+    updateargs: This function updates args in place by sequentially shifting all post-wildcard args by 1 (including the files the wildcard found), and then inserting the new
+    valid file. While this doesn't process wildcards in sequential order, I actually don't think this matters for the functionality of wildcards. If we were to update the wildcards
+    with replacement files sequentially, this would at the least involve an new index tracker and potentially more logic, which seemed too complicated to implement when we were 
+    submitting a day late. Although, it probably wouldn't be *too* hard. next time tho.
+
+    Redirection (<, >): After splitting the command line using readFunction, the shell checks for < and > symbols. 
+    If < is found, the input file is opened in O_RDONLY mode, and passed into externalFuction, where the child process duplicates it to standard input using dup2(). 
+    Similarly, if > is found, the output file is opened in write mode, and dup2() is used to redirect standard output.
+    Test case for redirection: 
+    mysh> echo "hi my name is ronaldo" > input.txt
+    mysh> cat < input.txt
+    "hi my name is ronaldo"
+
+    Internal command: If the first token of a line is one of the built-in commands (cd, pwd, die, or which), the shell executes the appropriate internal function. 
+    changeDirectory uses chdir() to change the current working directory. printDirectory uses getcwd() to display the current directory path. 
+    printError outputs "die: command error" if no argument is given, then exits. 
+    printWhich searches the directories /usr/local/bin/, /usr/bin/, and /bin/ (in that order) using access() to check whether the given command exists in each path.
+    Test case for internal command: 
+    mysh> pwd
+    /common/home/sh1949/Downloads/sys_prog
+    mysh> cd P3
+    mysh> pwd
+    /common/home/sh1949/Downloads/sys_prog/P3
+    mysh> which ls
+    /usr/bin/ls
+    mysh> which cat
+    /usr/bin/cat
+    mysh> die goodbye
+    goodbye
+
+    External command: If a command is not one of the built-in commands, the shell uses the externalFuction to execute it. 
+    This function searches for the executable’s path, creates a child process, and sets up input/output redirection if needed using the passed file descriptors.
+    Test case for external command: 
+    mysh> echo hi my name is ronaldo
+    hi my name is ronaldo
+    mysh> cat cmd.txt
+    ls
+    sort
+    echo hi ronaldo
+    echo ni hao

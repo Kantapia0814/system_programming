@@ -1,0 +1,4 @@
+ls
+sort
+echo hi ronaldo
+echo ni hao

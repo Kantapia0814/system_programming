@@ -1,0 +1,23 @@
+void countingWord(fileInfo* file, const char* word) {   //counts the total count of a word in all files
+    char* copy = strdup(word);
+    for (int i = 0; copy[i] != '\0'; i++) {
+        copy[i] = (char)tolower(copy[i]);
+    }
+
+    wordList* getWords = file->words;
+    while (getWords != NULL) {
+        if (strcmp(getWords->word, copy) == 0) {
+            getWords->wordCount++;
+            free(copy);
+            return;
+        }
+        getWords = getWords->next;
+    }
+
+    wordList* newWords = malloc(sizeof(wordList));
+    newWords->word = copy;
+    newWords->wordCount = 1;
+    newWords->next = file->words;
+    file->words = newWords;
+    file->wordTotal++;
+}
